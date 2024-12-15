@@ -6,7 +6,7 @@ from ultralytics import YOLO
 model = YOLO("runs/detect/train/weights/best.pt")
 
 # 推論圖片
-image_path = "necklace.jpg"
+image_path = "test/necklace.jpg"
 results = model(image_path)
 
 # 讀取圖片
@@ -28,7 +28,7 @@ for result in results:
             label = model.names[int(cls)]
         
         label_text = f"{label}: {score:.2f}" if score >= 0.1 else "no detection"
-        detection_texts.append(f"方框: ({int(x1)}, {int(y1)}, {int(x2)}, {int(y2)}) | {label_text}")
+        detection_texts.append(f"recognition frame: ({int(x1)}, {int(y1)}, {int(x2)}, {int(y2)}) | {label_text}")
         cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
 
 # 確保檢測文字清單非空

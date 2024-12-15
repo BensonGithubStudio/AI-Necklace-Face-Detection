@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自動拍照並存檔</title>
+</head>
+<body>
+    <h1>自動拍照並存檔</h1>
+    <video id="video" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // 啟用相機
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (error) {
+                console.error("無法啟用相機：", error);
+            }
+        }
+
+        // 每 10 秒拍照並下載到本機
+        function captureAndSave() {
+            setInterval(() => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL("image/png");
+
+                // 將圖片數據傳送到後端
+                fetch("http://127.0.0.1:5000/upload", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ image: imageData }),
+                })
+                .then((response) => response.text())
+                .then((data) => console.log("圖片已儲存：", data))
+                .catch((error) => console.error("上傳失敗：", error));
+            }, 10000); // 每 10 秒執行一次
+        }
+
+
+        // 初始化
+        startCamera();
+        captureAndSave();
+    </script>
+</body>
+</html>
