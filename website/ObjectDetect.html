@@ -53,6 +53,15 @@
             background-color: #ccc;
         }
 
+        #instantButton {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        #instantButton:disabled {
+            background-color: #ccc;
+        }
+
         button:hover {
             opacity: 0.9;
         }
@@ -73,6 +82,7 @@
     <div>
         <button id="startButton">開始拍照</button>
         <button id="stopButton" disabled>停止拍照</button>
+        <button id="instantButton">馬上拍照</button> <!-- 新增馬上拍照按鈕 -->
     </div>
     <video id="video" autoplay playsinline width="640" height="480"></video>
     <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
@@ -83,6 +93,7 @@
         const ctx = canvas.getContext("2d");
         const startButton = document.getElementById("startButton");
         const stopButton = document.getElementById("stopButton");
+        const instantButton = document.getElementById("instantButton"); // 取得馬上拍照按鈕
 
         let captureInterval = null; // 定時器的變數
 
@@ -127,12 +138,31 @@
             stopButton.disabled = true;
         }
 
+        // 馬上拍照
+        function takeInstantPhoto() {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL("image/png");
+
+            // 將圖片數據傳送到後端
+            fetch("http://127.0.0.1:5000/upload", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ image: imageData }),
+            })
+            .then((response) => response.text())
+            .then((data) => console.log("馬上拍照圖片已儲存：", data))
+            .catch((error) => console.error("拍照失敗：", error));
+        }
+
         // 初始化
         startCamera();
 
         // 綁定按鈕事件
         startButton.addEventListener("click", startCapture);
         stopButton.addEventListener("click", stopCapture);
+        instantButton.addEventListener("click", takeInstantPhoto); // 監聽馬上拍照按鈕的事件
     </script>
 </body>
 </html>
