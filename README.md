@@ -8,4 +8,4 @@ pip install flask-cors
 
 啟動環境
 cd AI-Necklace-Face-Detection
-python website\server.py
+python server.py

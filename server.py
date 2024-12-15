@@ -3,6 +3,7 @@ from flask_cors import CORS
 import base64
 import os
 from datetime import datetime
+import subprocess  # 用於執行外部程式
 
 app = Flask(__name__)
 CORS(app)  # 啟用 CORS
@@ -28,6 +29,14 @@ def upload_image():
     # 將圖片保存到本地
     with open(filepath, "wb") as f:
         f.write(image_binary)
+
+    # 呼叫另一個 Python 程式
+    try:
+        print(f"Running script/detection.py with {filepath}")
+        subprocess.run(["python", "script/detection.py", filepath], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e}")
+        return jsonify({"message": "Image saved, but processing failed", "filepath": filepath})
 
     return jsonify({"message": "Image saved", "filepath": filepath})
 
