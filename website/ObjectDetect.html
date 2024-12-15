@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>項鍊辨識系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: #f4f7fc;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        video {
+            border: 3px solid #4CAF50;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #startButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #startButton:disabled {
+            background-color: #ccc;
+        }
+
+        #stopButton {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #stopButton:disabled {
+            background-color: #ccc;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* 設定畫面大小和中央顯示 */
+        #canvas {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>項鍊辨識系統</h1>
+    <div>
+        <button id="startButton">開始拍照</button>
+        <button id="stopButton" disabled>停止拍照</button>
+    </div>
+    <video id="video" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const startButton = document.getElementById("startButton");
+        const stopButton = document.getElementById("stopButton");
+
+        let captureInterval = null; // 定時器的變數
+
+        // 啟用相機
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (error) {
+                console.error("無法啟用相機：", error);
+            }
+        }
+
+        // 開始拍照
+        function startCapture() {
+            if (captureInterval) return; // 防止重複啟動
+            captureInterval = setInterval(() => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL("image/png");
+
+                // 將圖片數據傳送到後端
+                fetch("http://127.0.0.1:5000/upload", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ image: imageData }),
+                })
+                .then((response) => response.text())
+                .then((data) => console.log("圖片已儲存：", data))
+                .catch((error) => console.error("上傳失敗：", error));
+            }, 5000); // 每 5 秒執行一次
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        }
+
+        // 停止拍照
+        function stopCapture() {
+            clearInterval(captureInterval);
+            captureInterval = null; // 清空定時器變數
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        // 初始化
+        startCamera();
+
+        // 綁定按鈕事件
+        startButton.addEventListener("click", startCapture);
+        stopButton.addEventListener("click", stopCapture);
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 import base64
 import os
@@ -7,6 +7,16 @@ import subprocess  # 用於執行外部程式
 
 app = Flask(__name__)
 CORS(app)  # 啟用 CORS
+
+# 設定靜態檔案目錄 (包含 ObjectDetect.html)
+STATIC_DIR = os.path.join(os.getcwd(), "website")
+os.makedirs(STATIC_DIR, exist_ok=True)
+
+# 根路徑處理器
+@app.route("/")
+def serve_object_detect():
+    # 提供 ObjectDetect.html
+    return send_from_directory(STATIC_DIR, "ObjectDetect.html")
 
 # 設定圖片存儲目錄
 SAVE_DIR = "test"

@@ -3,51 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自動拍照並存檔</title>
+    <title>項鍊辨識及臉部表情系統</title>
+    <style>
+        body {
+            margin: 0; /* 移除預設邊距 */
+            padding: 0;
+            display: flex;
+            background-color: bisque;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw; /* 占滿整個螢幕寬度 */
+        }
+        .container {
+            display: flex;
+            width: 100%; /* 填滿螢幕寬度 */
+            gap: 10px; /* 兩個 iframe 之間的間隙 */
+            justify-content: space-between; /* 保持並排對齊 */
+            padding: 10px; /* 增加外側空間 */
+            box-sizing: border-box; /* 包含邊框與間距 */
+        }
+        iframe {
+            background-color: aliceblue;
+            width: calc(50% - 5px); /* 填滿一半螢幕，減去間隙的一半 */
+            height: 750px; /* 固定高度 */
+            border: 2px solid #ccc; /* 添加邊框 */
+            border-radius: 25px; /* 圓角效果 */
+            box-shadow: 0 4px 8px rgba(155, 155, 155, 0.2); /* 陰影效果 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* 添加過渡效果 */
+        }
+        iframe:hover {
+            transform: scale(1.02); /* 滑鼠懸停放大效果 */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* 增強陰影 */
+        }
+        h1 {
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>自動拍照並存檔</h1>
-    <video id="video" autoplay playsinline width="640" height="480"></video>
-    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
-    <script>
-        const video = document.getElementById("video");
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-
-        // 啟用相機
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-            } catch (error) {
-                console.error("無法啟用相機：", error);
-            }
-        }
-
-        // 每 10 秒拍照並下載到本機
-        function captureAndSave() {
-            setInterval(() => {
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imageData = canvas.toDataURL("image/png");
-
-                // 將圖片數據傳送到後端
-                fetch("http://127.0.0.1:5000/upload", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ image: imageData }),
-                })
-                .then((response) => response.text())
-                .then((data) => console.log("圖片已儲存：", data))
-                .catch((error) => console.error("上傳失敗：", error));
-            }, 10000); // 每 10 秒執行一次
-        }
-
-
-        // 初始化
-        startCamera();
-        captureAndSave();
-    </script>
+    <h1>項鍊辨識及臉部表情系統</h1>
+    <div class="container">
+        <!-- Flask 提供的 ObjectDetect.html -->
+        <iframe src="http://127.0.0.1:5000" title="Object Detection" allow="camera; fullscreen"></iframe>
+        
+        <!-- Node.js face-api.js 的頁面 -->
+        <iframe src="http://127.0.0.1:3000" title="Face API" allow="camera; fullscreen"></iframe>
+    </div>
 </body>
 </html>
