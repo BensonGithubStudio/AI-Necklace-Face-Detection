@@ -1,6 +1,5 @@
 train: images/train  # 訓練圖片的資料夾路徑
 val: images/train      # 驗證圖片的資料夾路徑
 
-nc: 1  # 類別數量（根據你的標籤數量）
-# names: ['apple', 'banana', 'pineapple']  # 類別名稱
-names: ['necklace']
+nc: 2  # 類別數量（根據你的標籤數量）
+names: ['dark-vader', 'ditto']  # 類別名稱
