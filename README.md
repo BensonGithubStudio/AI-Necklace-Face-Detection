@@ -18,6 +18,7 @@ yolo task=detect mode=train model=yolov8n.pt data=AI-Necklace-Face-Detection/dat
 ``` bash
 pip install opencv-python
 pip install opencv-contrib-python
+pip install ultralytics
 pip install flask
 pip install flask-cors
 ```
