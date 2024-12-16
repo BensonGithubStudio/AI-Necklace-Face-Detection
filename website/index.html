@@ -6,38 +6,100 @@
     <title>項鍊辨識及臉部表情系統</title>
     <style>
         body {
-            margin: 0; /* 移除預設邊距 */
+            margin: 0;
             padding: 0;
             display: flex;
-            background-color: bisque;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 100vw; /* 占滿整個螢幕寬度 */
+            height: 100vh;
+            background: linear-gradient(135deg, #f7c8d1, #f4e1d2); /* 背景漸層 */
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
         }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin: 20px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* 增加標題陰影效果 */
+        }
+
         .container {
             display: flex;
-            width: 100%; /* 填滿螢幕寬度 */
-            gap: 10px; /* 兩個 iframe 之間的間隙 */
-            justify-content: space-between; /* 保持並排對齊 */
-            padding: 10px; /* 增加外側空間 */
-            box-sizing: border-box; /* 包含邊框與間距 */
+            justify-content: space-around;
+            gap: 15px;
+            width: 90%;
+            max-width: 1600px;
+            margin-top: 30px;
         }
+
         iframe {
-            background-color: aliceblue;
-            width: calc(50% - 5px); /* 填滿一半螢幕，減去間隙的一半 */
-            height: 850px; /* 固定高度 */
-            border: 2px solid #ccc; /* 添加邊框 */
-            border-radius: 25px; /* 圓角效果 */
-            box-shadow: 0 4px 8px rgba(155, 155, 155, 0.2); /* 陰影效果 */
-            transition: transform 0.3s ease, box-shadow 0.3s ease; /* 添加過渡效果 */
+            background-color: #f0f8ff;
+            width: 48%;
+            height: 80vh;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
         iframe:hover {
-            transform: scale(1.02); /* 滑鼠懸停放大效果 */
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* 增強陰影 */
+            transform: scale(1.03); /* 當滑鼠懸停時放大 */
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); /* 增強陰影 */
         }
-        h1 {
-            margin: 10px 0;
+
+        .corner-images {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 避免干擾點擊操作 */
+        }
+
+        .corner-images img {
+            position: absolute;
+            opacity: 0.7; /* 圖片透明度 */
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .corner-images img:hover {
+            transform: scale(1.1); /* 滑鼠懸停時放大 */
+            opacity: 1; /* 滑鼠懸停時提高透明度 */
+        }
+
+        .img1 {
+            top: 20px;
+            left: 20px;
+            width: 80px;
+        }
+
+        .img2 {
+            top: 20px;
+            right: 20px;
+            width: 100px;
+        }
+
+        .img3 {
+            bottom: 20px;
+            right: 20px;
+            width: 120px;
+        }
+
+        @media (max-width: 768px) {
+            .img1, .img2, .img3 {
+                width: 60px; /* 縮小圖片大小 */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .img1, .img2, .img3 {
+                width: 40px; /* 在小螢幕上進一步縮小圖片大小 */
+            }
         }
     </style>
 </head>
@@ -49,6 +111,13 @@
         
         <!-- Node.js face-api.js 的頁面 -->
         <iframe src="http://127.0.0.1:3000/../webcamFaceExpressionRecognition.html" title="Face API" allow="camera; fullscreen"></iframe>
+    </div>
+
+    <!-- 角落圖片 -->
+    <div class="corner-images">
+        <img src="images/necklace-1.png" alt="Image 1" class="img1">
+        <img src="images/necklace-2.png" alt="Image 2" class="img2">
+        <img src="images/necklace-3.png" alt="Image 3" class="img3">
     </div>
 </body>
 </html>

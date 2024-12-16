@@ -1,0 +1,11 @@
+Timestamp,Object,Confidence,Coordinates,Image
+2024-12-16 11:18:39,No Object,0.0,,test\photo_2024-12-16_11-18-32.png
+2024-12-16 11:33:06,necklace,0.25,"(135, 59, 523, 349)",test\photo_2024-12-16_11-32-55.png
+2024-12-16 11:33:06,No Object,0.0,,test\photo_2024-12-16_11-32-56.png
+2024-12-16 11:33:07,No Object,0.0,,test\photo_2024-12-16_11-32-56.png
+2024-12-16 11:38:35,No Object,0.0,,test\photo_2024-12-16_11-38-28.png
+2024-12-16 12:46:42,No Object,0.0,,test\photo_2024-12-16_12-46-23.png
+2024-12-16 12:49:17,necklace,0.44,"(227, 96, 627, 403)",test\photo_2024-12-16_12-48-54.png
+2024-12-16 12:50:06,No Object,0.0,,test\photo_2024-12-16_12-49-49.png
+2024-12-16 12:50:27,No Object,0.0,,test\photo_2024-12-16_12-50-18.png
+2024-12-16 12:51:38,necklace,0.25,"(3, 0, 633, 420)",test\photo_2024-12-16_12-51-20.png
