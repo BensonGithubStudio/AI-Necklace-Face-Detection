@@ -1,5 +1,7 @@
 import sys
 import cv2
+import pandas as pd
+from datetime import datetime
 import numpy as np
 from ultralytics import YOLO
 
@@ -30,12 +32,25 @@ def wrap_text(text, max_width, font, font_scale, thickness):
         lines.append(current_line)
     return lines
 
+def save_to_csv(data, output_file="results.csv"):
+    """將偵測結果保存到 CSV 文件"""
+    try:
+        # 如果文件已存在，讀取並追加新數據
+        existing_df = pd.read_csv(output_file)
+        updated_df = pd.concat([existing_df, pd.DataFrame(data)], ignore_index=True)
+    except FileNotFoundError:
+        # 如果文件不存在，創建新文件
+        updated_df = pd.DataFrame(data)
+
+    updated_df.to_csv(output_file, index=False)
+    print(f"Results saved to {output_file}")
+
 def main(image_path):
     try:
         # 確保所有舊視窗被關閉
         cv2.destroyAllWindows()
         cv2.waitKey(1)  # 等待一個短暫時間確保視窗關閉
-        
+
         # 載入 YOLO 模型
         model = YOLO("runs/detect/train/weights/best.pt")
 
@@ -51,8 +66,9 @@ def main(image_path):
         # 縮放圖片限制最大大小
         image = resize_image(image)
 
-        # 建立一個文字結果清單
+        # 建立一個文字結果清單和數據儲存結構
         detection_texts = []
+        detection_data = []
 
         # 遍歷檢測結果，繪製方框和標籤
         for result in results:
@@ -67,10 +83,29 @@ def main(image_path):
                 detection_texts.append(
                     f"recognition frame: ({int(x1)}, {int(y1)}, {int(x2)}, {int(y2)}) | {label_text}"
                 )
+                detection_data.append({
+                    "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "Object": label,
+                    "Confidence": round(float(score), 2),
+                    "Coordinates": f"({int(x1)}, {int(y1)}, {int(x2)}, {int(y2)})",
+                    "Image": image_path
+                })
+
+                # 在圖片上繪製框和標籤
                 cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
 
         if not detection_texts:
             detection_texts.append("no object!")
+            detection_data.append({
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Object": "No Object",
+                "Confidence": 0.0,
+                "Coordinates": "N/A",
+                "Image": image_path
+            })
+
+        # 保存結果到 CSV
+        save_to_csv(detection_data)
 
         # 建立一個空白的文字結果圖像
         max_text_width = image.shape[1] - 20  # 限制文字的寬度
