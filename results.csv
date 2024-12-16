@@ -9,3 +9,4 @@ Timestamp,Object,Confidence,Coordinates,Image
 2024-12-16 12:50:06,No Object,0.0,,test\photo_2024-12-16_12-49-49.png
 2024-12-16 12:50:27,No Object,0.0,,test\photo_2024-12-16_12-50-18.png
 2024-12-16 12:51:38,necklace,0.25,"(3, 0, 633, 420)",test\photo_2024-12-16_12-51-20.png
+2024-12-16 13:51:36,No Object,0.0,N/A,test\photo_2024-12-16_13-51-22.png

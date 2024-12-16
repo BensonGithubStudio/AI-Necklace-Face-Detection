@@ -6,7 +6,7 @@ from ultralytics import YOLO
 model = YOLO("runs/detect/train/weights/best.pt")
 
 # 推論圖片
-image_path = "test/necklace.jpg"
+image_path = "test/necklace5.jpg"
 results = model(image_path)
 
 # 讀取圖片

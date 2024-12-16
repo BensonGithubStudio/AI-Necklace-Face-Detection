@@ -16,6 +16,7 @@
             background: linear-gradient(135deg, #f7c8d1, #f4e1d2); /* 背景漸層 */
             font-family: 'Arial', sans-serif;
             overflow: hidden;
+            position: relative; /* 確保子元素的定位相對於 body */
         }
 
         h1 {
@@ -26,6 +27,7 @@
             font-weight: 600;
             letter-spacing: 2px;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* 增加標題陰影效果 */
+            z-index: 2; /* 提升標題層級 */
         }
 
         .container {
@@ -35,6 +37,7 @@
             width: 90%;
             max-width: 1600px;
             margin-top: 30px;
+            z-index: 2; /* 提升 iframe 區域層級 */
         }
 
         iframe {
@@ -59,11 +62,12 @@
             width: 100%;
             height: 100%;
             pointer-events: none; /* 避免干擾點擊操作 */
+            z-index: 1; /* 設置角落圖片為最下層 */
         }
 
         .corner-images img {
             position: absolute;
-            opacity: 0.7; /* 圖片透明度 */
+            opacity: 0.25; /* 圖片透明度 */
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
@@ -75,19 +79,19 @@
         .img1 {
             top: 20px;
             left: 20px;
-            width: 80px;
+            width: 350px;
         }
 
         .img2 {
-            top: 20px;
-            right: 20px;
-            width: 100px;
+            top: -50px;
+            right: -175px;
+            width: 550px;
         }
 
         .img3 {
             bottom: 20px;
             right: 20px;
-            width: 120px;
+            width: 220px;
         }
 
         @media (max-width: 768px) {
@@ -104,6 +108,14 @@
     </style>
 </head>
 <body>
+    <!-- 背景圖片層 -->
+    <div class="corner-images">
+        <img src="images/necklace-1.png" alt="Image 1" class="img1">
+        <img src="images/necklace-2.png" alt="Image 2" class="img2">
+        <img src="images/necklace-3.png" alt="Image 3" class="img3">
+    </div>
+
+    <!-- 主要內容層 -->
     <h1>項鍊辨識及臉部表情系統</h1>
     <div class="container">
         <!-- Flask 提供的 ObjectDetect.html -->
@@ -111,13 +123,6 @@
         
         <!-- Node.js face-api.js 的頁面 -->
         <iframe src="http://127.0.0.1:3000/../webcamFaceExpressionRecognition.html" title="Face API" allow="camera; fullscreen"></iframe>
-    </div>
-
-    <!-- 角落圖片 -->
-    <div class="corner-images">
-        <img src="images/necklace-1.png" alt="Image 1" class="img1">
-        <img src="images/necklace-2.png" alt="Image 2" class="img2">
-        <img src="images/necklace-3.png" alt="Image 3" class="img3">
     </div>
 </body>
 </html>
