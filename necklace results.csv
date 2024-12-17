@@ -1,0 +1,6 @@
+Timestamp,Object,Confidence,Coordinates,Image
+2024-12-17 23:29:59,No Object,0.0,,test\photo_2024-12-17_23-29-41.png
+2024-12-17 23:32:28,dark-vader,0.87,"(360, 353, 392, 387)",test\photo_2024-12-17_23-32-11.png
+2024-12-17 23:34:12,No Object,0.0,,test\photo_2024-12-17_23-34-00.png
+2024-12-17 23:34:52,dark-vader,0.37,"(421, 398, 449, 428)",test\photo_2024-12-17_23-34-40.png
+2024-12-17 23:49:56,No Object,0.0,N/A,test\photo_2024-12-17_23-49-41.png

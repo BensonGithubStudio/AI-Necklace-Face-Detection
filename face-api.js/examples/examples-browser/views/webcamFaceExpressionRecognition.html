@@ -17,6 +17,16 @@
       margin-top: 10px;
       visibility: hidden; /* 初始隱藏 */
     }
+
+    /* 新增的顯示結果區塊 */
+    #expressionResults {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f4f7fc;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.1em;
+    }
   </style>
 </head>
 <body>
@@ -29,6 +39,9 @@
     </div>
     <!-- 提示字區塊 -->
     <div id="jsonPrompt">JSON 已加入列表</div>
+
+    <!-- 顯示表情辨識結果的區域 -->
+    <div id="expressionResults">正在分析表情...</div>
 
     <!-- 新增下載按鈕 -->
     <div style="margin-top: 20px;">
@@ -64,7 +77,13 @@
           saveExpressionData(result);
           isSaved = true; // 設置為已儲存
           showJsonPrompt(); // 顯示提示字
+
+          // 跳轉到 ObjectDetect.html 頁面
+          window.location.href = "ObjectDetect.html";
         }
+
+        // 更新顯示表情辨識結果
+        updateExpressionResults(result.expressions);
 
         // 繪製邊界框和表情
         const canvas = document.getElementById('overlay');
@@ -107,6 +126,21 @@
       setTimeout(() => {
         prompt.style.visibility = "hidden"; // 2 秒後隱藏
       }, 2000);
+    }
+
+    // 更新表情結果顯示
+    function updateExpressionResults(expressions) {
+      const expressionResults = document.getElementById("expressionResults");
+      expressionResults.innerHTML = `
+        <strong>表情分析結果:</strong><br>
+        Neutral: ${expressions.neutral.toFixed(2)}<br>
+        Happy: ${expressions.happy.toFixed(2)}<br>
+        Sad: ${expressions.sad.toFixed(2)}<br>
+        Angry: ${expressions.angry.toFixed(2)}<br>
+        Disgusted: ${expressions.disgusted.toFixed(2)}<br>
+        Surprised: ${expressions.surprised.toFixed(2)}<br>
+        Fearful: ${expressions.fearful.toFixed(2)}<br>
+      `;
     }
 
     // 下載 JSON 或 CSV 檔案

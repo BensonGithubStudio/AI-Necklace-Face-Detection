@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV 合併工具</title>
+</head>
+<body>
+  <h2>CSV 合併工具</h2>
+  <input type="file" id="fileInput" accept=".csv" />
+  <button id="mergeButton">合併 CSV</button>
+
+  <script>
+    let newJsonData = [
+      {"timestamp": "2024-06-17T12:34:56Z", "neutral": "0.0000", "happy": "0.0000", "sad": "0.0000", "surprised": "0.9998"}
+    ];
+
+    document.getElementById("mergeButton").addEventListener("click", async () => {
+      const fileInput = document.getElementById("fileInput");
+      if (!fileInput.files[0]) {
+        alert("請選擇一個 CSV 檔案進行合併！");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const fileContent = await file.text();
+      const existingData = parseCSV(fileContent);
+      const combinedData = mergeCSVData(existingData, newJsonData);
+
+      const combinedCSV = convertToCSV(combinedData);
+      downloadCSV(combinedCSV, "combined_output.csv");
+    });
+
+    // 解析 CSV 檔案
+    function parseCSV(csvContent) {
+      const lines = csvContent.trim().split("\n");
+      const headers = lines.shift().split(",");
+
+      return lines.map(line => {
+        const values = line.split(",");
+        let obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = values[index];
+        });
+        return obj;
+      });
+    }
+
+    // 合併 CSV 與 JSON 資料
+    function mergeCSVData(existingData, newData) {
+      return [...existingData, ...newData];
+    }
+
+    // 轉換成 CSV 格式
+    function convertToCSV(data) {
+      const headers = Object.keys(data[0]);
+      const csvRows = data.map(row => headers.map(header => row[header]).join(","));
+      return [headers.join(","), ...csvRows].join("\n");
+    }
+
+    // 下載 CSV 檔案
+    function downloadCSV(content, filename) {
+      const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+  </script>
+</body>
+</html>
