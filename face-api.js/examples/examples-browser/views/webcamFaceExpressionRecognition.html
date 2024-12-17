@@ -8,156 +8,157 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css">
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  <style>
+    #jsonPrompt {
+      color: green;
+      font-weight: bold;
+      font-size: 1.2em;
+      text-align: center;
+      margin-top: 10px;
+      visibility: hidden; /* 初始隱藏 */
+    }
+  </style>
 </head>
 <body>
   <div id="navbar"></div>
   <div class="center-content page-container">
-    <h4><strong>表情辨識系統</strong></h4>  <!-- 這是顯示在頁面中的大標題 -->
-
-    <div class="progress" id="loader">
-      <div class="indeterminate"></div>
-    </div>
+    <h4><strong>表情辨識系統</strong></h4>
     <div style="position: relative" class="margin">
-      <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
-      <canvas id="overlay" />
+      <video onloadedmetadata="onPlay()" id="inputVideo" autoplay muted playsinline></video>
+      <canvas id="overlay"></canvas>
     </div>
+    <!-- 提示字區塊 -->
+    <div id="jsonPrompt">JSON 已加入列表</div>
 
-    <div class="row side-by-side">
-      <!-- Existing controls... -->
-
-      <!-- New Button and Table for Expressions -->
-      <button class="waves-effect waves-light btn" onclick="saveExpressions()">Save Expressions</button>
-      <button class="waves-effect waves-light btn" onclick="downloadCSV()">Download CSV</button>
-      <table id="expressionsTable">
-        <thead>
-          <tr>
-            <th>Expression</th>
-            <th>Confidence</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 表格數據會顯示在這裡 -->
-        </tbody>
-      </table>
+    <!-- 新增下載按鈕 -->
+    <div style="margin-top: 20px;">
+      <button onclick="downloadAllData('json')" class="waves-effect waves-light btn">下載 JSON</button>
+      <button onclick="downloadAllData('csv')" class="waves-effect waves-light btn">下載 CSV</button>
     </div>
+  </div>
 
   <script>
-    let forwardTimes = []
-    let withBoxes = true
-    let resizedResult = null;  // 用於存儲最新的結果
-
-    function onChangeHideBoundingBoxes(e) {
-      withBoxes = !$(e.target).prop('checked')
-    }
-
-    function updateTimeStats(timeInMs) {
-      forwardTimes = [timeInMs].concat(forwardTimes).slice(0, 30)
-      const avgTimeInMs = forwardTimes.reduce((total, t) => total + t) / forwardTimes.length
-      $('#time').val(`${Math.round(avgTimeInMs)} ms`)
-      $('#fps').val(`${faceapi.utils.round(1000 / avgTimeInMs)}`)
-    }
+    let expressionDataList = []; // 累積所有辨識結果的陣列
+    let faceInFrameTime = null; // 記錄人臉出現在畫面中的時間
+    let isSaved = false; // 防止重複儲存
+    let isFaceCurrentlyDetected = false;
 
     async function onPlay() {
-      const videoEl = $('#inputVideo').get(0)
+      const videoEl = document.getElementById('inputVideo');
 
-      if(videoEl.paused || videoEl.ended || !isFaceDetectionModelLoaded())
-        return setTimeout(() => onPlay())
-
-      const options = getFaceDetectorOptions()
-
-      const ts = Date.now()
-
-      const result = await faceapi.detectSingleFace(videoEl, options).withFaceExpressions()
-
-      updateTimeStats(Date.now() - ts)
-
-      if (result) {
-        const canvas = $('#overlay').get(0)
-        const dims = faceapi.matchDimensions(canvas, videoEl, true)
-
-        resizedResult = faceapi.resizeResults(result, dims)
-        const minConfidence = 0.05
-        if (withBoxes) {
-          faceapi.draw.drawDetections(canvas, resizedResult)
-        }
-        faceapi.draw.drawFaceExpressions(canvas, resizedResult, minConfidence)
+      if (videoEl.paused || videoEl.ended || !isFaceDetectionModelLoaded()) {
+        return setTimeout(() => onPlay());
       }
 
-      setTimeout(() => onPlay())
+      const options = getFaceDetectorOptions();
+      const result = await faceapi.detectSingleFace(videoEl, options).withFaceExpressions();
+
+      if (result) {
+        if (!isFaceCurrentlyDetected) {
+          // 人臉首次出現，記錄時間
+          faceInFrameTime = Date.now();
+          isFaceCurrentlyDetected = true;
+          isSaved = false; // 重置儲存狀態
+        } else if (Date.now() - faceInFrameTime >= 3000 && !isSaved) {
+          // 人臉已持續3秒且尚未儲存
+          saveExpressionData(result);
+          isSaved = true; // 設置為已儲存
+          showJsonPrompt(); // 顯示提示字
+        }
+
+        // 繪製邊界框和表情
+        const canvas = document.getElementById('overlay');
+        const dims = faceapi.matchDimensions(canvas, videoEl, true);
+        const resizedResult = faceapi.resizeResults(result, dims);
+
+        faceapi.draw.drawDetections(canvas, resizedResult);
+        faceapi.draw.drawFaceExpressions(canvas, resizedResult, 0.05);
+      } else {
+        // 人臉離開畫面，重置狀態
+        isFaceCurrentlyDetected = false;
+        faceInFrameTime = null;
+        isSaved = false;
+      }
+
+      setTimeout(() => onPlay());
     }
 
-    // 儲存表情數據並顯示在表格中
-    function saveExpressions() {
-      if (!resizedResult) {
-        alert("No face detected yet.");
+    // 儲存表情資料到陣列
+    function saveExpressionData(result) {
+      const timestamp = new Date().toISOString();
+      const expressionData = {
+        timestamp,
+        neutral: result.expressions.neutral.toFixed(2),
+        happy: result.expressions.happy.toFixed(2),
+        sad: result.expressions.sad.toFixed(2),
+        angry: result.expressions.angry.toFixed(2),
+        disgusted: result.expressions.disgusted.toFixed(2),
+        surprised: result.expressions.surprised.toFixed(2),
+        fearful: result.expressions.fearful.toFixed(2)
+      };
+      expressionDataList.push(expressionData); // 累積資料
+      console.log("儲存表情資料:", expressionData);
+    }
+
+    // 顯示 JSON 提示字並自動隱藏
+    function showJsonPrompt() {
+      const prompt = document.getElementById("jsonPrompt");
+      prompt.style.visibility = "visible"; // 顯示提示字
+      setTimeout(() => {
+        prompt.style.visibility = "hidden"; // 2 秒後隱藏
+      }, 2000);
+    }
+
+    // 下載 JSON 或 CSV 檔案
+    function downloadAllData(format) {
+      if (expressionDataList.length === 0) {
+        alert("尚未偵測到任何表情資料。");
         return;
       }
 
-      const expressions = resizedResult.expressions;
-      const tbody = document.querySelector('#expressionsTable tbody');
-      
-      // 清空表格
-      tbody.innerHTML = '';
-
-      // 將表情數據顯示在表格中
-      for (const expression in expressions) {
-        const row = document.createElement('tr');
-        const nameCell = document.createElement('td');
-        const confidenceCell = document.createElement('td');
-
-        nameCell.textContent = expression;
-        confidenceCell.textContent = expressions[expression].toFixed(2);
-
-        row.appendChild(nameCell);
-        row.appendChild(confidenceCell);
-        tbody.appendChild(row);
+      if (format === 'json') {
+        const jsonContent = JSON.stringify(expressionDataList, null, 2);
+        downloadFile(jsonContent, 'application/json', 'expressions.json');
+      } else if (format === 'csv') {
+        const headers = ["Timestamp", "Neutral", "Happy", "Sad", "Angry", "Disgusted", "Surprised", "Fearful"];
+        const rows = expressionDataList.map(data => [
+          data.timestamp,
+          data.neutral,
+          data.happy,
+          data.sad,
+          data.angry,
+          data.disgusted,
+          data.surprised,
+          data.fearful
+        ]);
+        const csvContent = [headers.join(",")].concat(rows.map(row => row.join(","))).join("\n");
+        downloadFile(csvContent, 'text/csv;charset=utf-8;', 'expressions.csv');
       }
     }
 
-    // 將表格數據轉換為 CSV 格式並下載
-    function downloadCSV() {
-      const table = document.querySelector('#expressionsTable');
-      const rows = table.querySelectorAll('tr');
-      const csvArray = [];
-      
-      // 遍歷表格的每一行
-      rows.forEach(row => {
-        const cols = row.querySelectorAll('td, th');
-        const csvRow = [];
-        cols.forEach(col => csvRow.push(col.textContent.trim()));
-        csvArray.push(csvRow.join(','));
-      });
-
-      const csvContent = csvArray.join('\n');
-
-      // 創建一個隱藏的下載鏈接
-      const downloadLink = document.createElement('a');
-      downloadLink.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-      downloadLink.target = '_blank';
-      downloadLink.download = 'expressions.csv';
-
-      // 點擊該鏈接以觸發下載
-      downloadLink.click();
+    // 觸發下載檔案的功能
+    function downloadFile(content, mimeType, filename) {
+      const blob = new Blob([content], { type: mimeType });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
     }
 
     async function run() {
-      // load face detection and face expression recognition models
-      await changeFaceDetector(TINY_FACE_DETECTOR)
-      await faceapi.loadFaceExpressionModel('/')
-      changeInputSize(224)
+      await changeFaceDetector(TINY_FACE_DETECTOR);
+      await faceapi.loadFaceExpressionModel('/');
+      changeInputSize(224);
 
-      // try to access users webcam and stream the images
-      // to the video element
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
-      const videoEl = $('#inputVideo').get(0)
-      videoEl.srcObject = stream
+      const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+      const videoEl = document.getElementById('inputVideo');
+      videoEl.srcObject = stream;
     }
 
-    $(document).ready(function() {
-      renderNavBar('#navbar', 'webcam_face_expression_recognition')
-      initFaceDetectionControls()
-      run()
-    })
+    $(document).ready(function () {
+      renderNavBar('#navbar', 'webcam_face_expression_recognition');
+      run();
+    });
   </script>
 </body>
 </html>
